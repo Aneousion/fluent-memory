@@ -1,0 +1,18 @@
+{
+  "_format": "hh-vy-cache-1",
+  "files": {
+    "/workspaces/fluent-memory/contract/contracts/hello-v.vy": {
+      "lastModificationDate": 1743074358572,
+      "contentHash": "6f1ea52869d3f2630a900e292492ad41",
+      "sourceName": "contracts/hello-v.vy",
+      "vyperConfig": {
+        "version": "0.3.1",
+        "settings": {}
+      },
+      "versionPragma": "^0.3.0",
+      "artifacts": [
+        "hello-v"
+      ]
+    }
+  }
+}
