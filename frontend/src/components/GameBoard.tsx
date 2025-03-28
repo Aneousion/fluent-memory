@@ -3,7 +3,6 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import Card from "./Card"
-
 import image1 from "../images/image-01.webp"
 import image2 from "../images/image-02.webp"
 import image3 from "../images/image-03.webp"
@@ -14,7 +13,7 @@ import image6 from "../images/image-06.webp"
 const images = [image1, image2, image3, image4, image5, image6]
 
 function createDeck(symbols: string[]): { id: number; symbol: string; isFlipped: boolean; isMatched: boolean }[] {
-  const deck = symbols.concat(symbols) // Duplicate for 6 pairs
+  const deck = symbols.concat(symbols)
   return deck
     .sort(() => Math.random() - 0.5)
     .map((symbol, index) => ({
@@ -86,7 +85,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ onMintNFT }) => {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="grid grid-cols-4 gap-4 mx-auto mb-8">
+      <div className="grid grid-cols-3 gap-4 mx-auto mb-8 md:grid-cols-4">
         {cards.map((card) => (
           <Card key={card.id} card={card} onClick={handleCardClick} />
         ))}
@@ -120,4 +119,3 @@ const GameBoard: React.FC<GameBoardProps> = ({ onMintNFT }) => {
 }
 
 export default GameBoard
-

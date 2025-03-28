@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { ethers } from "ethers"
-import { WagmiProvider, createConfig, http, useAccount } from "wagmi"
+import { WagmiProvider, http, useAccount } from "wagmi"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { RainbowKitProvider, darkTheme, ConnectButton } from "@rainbow-me/rainbowkit"
+import { RainbowKitProvider, darkTheme, ConnectButton, getDefaultConfig } from "@rainbow-me/rainbowkit"
 import "@rainbow-me/rainbowkit/styles.css"
 import GameBoard from "./components/GameBoard"
 import NFTImage from "./images/Tectra.png"
@@ -30,17 +30,19 @@ const fluentDevnetChain = {
 }
 
 // Wagmi Config with RainbowKit
-const config = createConfig({
+const config = getDefaultConfig({
+  appName: 'Fluent Memory',
+  projectId: 'ffd9fa45ea7d8418e595f7b5a1c2e657', // Replace with actual projectId
   chains: [fluentDevnetChain],
   transports: {
-    [20993]: http("https://rpc.dev.gblend.xyz/"),
+    [fluentDevnetChain.id]: http("https://rpc.dev.gblend.xyz/"),
   },
-})
+});
 
 const queryClient = new QueryClient()
 
 // Contract Configuration
-const contractAddress = "0xE2050D25186c0eB8b860Db327c1356a839E889CD" // Your deployed ERC-1155 address
+const contractAddress = "0xE2050D25186c0eB8b860Db327c1356a839E889CD"
 const contractABI = [
   "function mintNFT(address to, string memory tokenURI) public returns (uint256)",
   "function _tokenIdCounter() public view returns (uint256)",
@@ -54,7 +56,6 @@ const Confetti = () => {
   >([])
 
   useEffect(() => {
-    // Create confetti particles
     const colors = ["#ff77e9", "#a855f7", "#ec4899", "#ffffff"]
     const newParticles = Array.from({ length: 100 }).map((_, i) => ({
       id: i,
@@ -67,7 +68,6 @@ const Confetti = () => {
 
     setParticles(newParticles)
 
-    // Animate particles
     let animationId: number
     let frame = 0
 
@@ -84,7 +84,6 @@ const Confetti = () => {
             .filter((p) => p.y < window.innerHeight),
         )
       }
-
       if (particles.length > 0) {
         animationId = requestAnimationFrame(animate)
       }
@@ -129,9 +128,9 @@ function App() {
     const setupSigner = async () => {
       if (connector && isConnected) {
         try {
-          const provider: any = await connector.getProvider()
+          const provider:any = await connector.getProvider()
           const web3Provider = new ethers.BrowserProvider(provider)
-          const signer = await web3Provider.getSigner()
+          const signer: any = await web3Provider.getSigner()
           setSigner(signer)
         } catch (error) {
           console.error("Error setting up signer:", error)
@@ -151,7 +150,7 @@ function App() {
     }
     const contract = new ethers.Contract(contractAddress, contractABI, signer)
     try {
-      const code = await signer.provider.getCode(contractAddress)
+      const code: any = await signer.provider.getCode(contractAddress)
       if (code === "0x") {
         alert("Contract not found at this address")
         return
@@ -171,34 +170,19 @@ function App() {
     }
     const contract = new ethers.Contract(contractAddress, contractABI, signer)
     try {
-      // const metadata = {
-      //   name: "Fluent Memory",
-      //   description: "A memory match game achievement",
-      //   image: "ipfs://bafkreiam4hsd4gcca26pxcg226j52vo5l6clr2ovte2uppnvurpdmflg6m",
-      //   attributes: [{ trait_type: "Time", value: "15" }],
-      // }
-      // Since Pinata SDK is removed, assume metadata is pre-uploaded or use a static URI
-      // For simplicity, we'll encode metadata as JSON and use a gateway URL
-      // const metadataJson = JSON.stringify(metadata)
-      // const metadataBlob = new Blob([metadataJson], { type: "application/json" })
-      // const metadataUrl = URL.createObjectURL(metadataBlob) // Temporary local URL for testing
-      // Ideally, this should be uploaded to IPFS separately and pinned
-      // For now, we'll use a pre-uploaded CID or gateway; replace with actual IPFS URI if uploaded
-      const uri = `ipfs://bafkreiam4hsd4gcca26pxcg226j52vo5l6clr2ovte2uppnvurpdmflg6m` // Use your CID directly
+      const uri = `ipfs://bafkreiam4hsd4gcca26pxcg226j52vo5l6clr2ovte2uppnvurpdmflg6m`
       const tx = await contract.mintNFT(address, uri)
       await tx.wait()
 
-      // Show success popup and confetti instead of alert
       setShowModal(false)
       setShowSuccessModal(true)
       setShowConfetti(true)
 
-      // Auto-hide success popup after 5 seconds
       setTimeout(() => {
         setShowSuccessModal(false)
         setShowConfetti(false)
-        window.location.reload() // Refresh the page after popup is hidden
-      }, 5000)
+        window.location.reload()
+      }, 20000)
     } catch (error) {
       console.error("Failed to mint NFT:", error)
     }
@@ -233,29 +217,24 @@ function App() {
 
       {/* Main content container */}
       <div className="relative z-10 min-h-screen flex flex-col items-center">
-        {/* Connect button - fixed position */}
-        <div className="absolute top-4 right-4 z-50">
-          <ConnectButton />
-        </div>
-
-        {/* Header */}
-        <div className="w-full flex justify-center items-center mt-8 mb-6">
-          <div className="flex items-center">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-red-500 flex items-center justify-center text-white font-bold text-xl mr-3">
-              F
-            </div>
-            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-red-500">
+        {/* Header and Connect Button Container */}
+        <div className="w-full flex flex-col sm:flex-row justify-between items-center px-4 pt-4">
+          <div className="flex items-center mb-4 sm:mb-0">
+            <h1 className="text-3xl sm:text-4xl p-8 font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-red-500">
               Fluent Memory
             </h1>
+          </div>
+          <div className="z-50">
+            <ConnectButton />
           </div>
         </div>
 
         {/* Main content with glass effect */}
-        <div className="container mx-auto px-4 max-w-4xl">
+        <div className="container mx-auto px-4 max-w-4xl mt-6">
           {/* Connection status */}
           <div className="mb-6">
             {isConnected && address ? (
-              <div className="bg-black/70 backdrop-blur-md rounded-lg px-4 py-2 text-white/90 text-sm font-mono overflow-hidden text-ellipsis">
+              <div className="bg-black/70 backdrop-blur-md rounded-lg px-6 py-2 text-white/90 text-sm font-mono overflow-hidden text-ellipsis">
                 Connected: {address}
               </div>
             ) : (
@@ -274,7 +253,7 @@ function App() {
             <ol className="list-decimal list-inside text-white/90 space-y-1 pl-2">
               <li>Connect your wallet using the button above.</li>
               <li>Start the game and find all pairs.</li>
-              <li>If you finish within 60 seconds, click "Mint NFT" to claim your reward.</li>
+              <li>If you finish within 60 seconds, a "Mint NFT" button will appear to claim your reward.</li>
             </ol>
           </div>
 
@@ -289,7 +268,6 @@ function App() {
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/80 backdrop-blur-sm">
           <div className="bg-black/90 backdrop-blur-md border border-gray-500/30 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl relative">
-            {/* Close button */}
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-3 right-3 text-gray-400 hover:text-white"
@@ -311,19 +289,19 @@ function App() {
               </svg>
             </button>
 
-            <h3 className="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-red-500">
+            <h3 className="text-2xl font-bold mb-6 text-white text-center">
               You are about to mint Fluent Memory
             </h3>
-            <div className="p-[2px] bg-gradient-to-r from-pink-500 via-purple-500 to-red-500 rounded-lg mb-8">
+            <div className="p-[2px] rounded-lg mb-8">
               <img
                 src={NFTImage || "/placeholder.svg"}
                 alt="NFT"
-                className="w-48 h-48 mx-auto object-contain rounded-lg bg-black"
+                className="w-60 h-60 mx-auto object-contain rounded-lg bg-black"
               />
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <a
-                href="https://faucet.devnet.fluentlabs.xyz"
+                href="https://faucet.dev.gblend.xyz"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 bg-white text-black py-3 px-4 rounded-lg font-medium text-center transition-transform hover:scale-105"
@@ -348,11 +326,11 @@ function App() {
             <h3 className="text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-red-500 text-center">
               NFT Minted Successfully!
             </h3>
-            <div className="p-[2px] bg-gradient-to-r from-pink-500 via-purple-500 to-red-500 rounded-lg mb-6">
+            <div className="p-[2px] rounded-lg mb-8">
               <img
                 src={NFTImage || "/placeholder.svg"}
                 alt="NFT"
-                className="w-48 h-48 mx-auto object-contain rounded-lg bg-black"
+                className="w-60 h-60 mx-auto object-contain rounded-lg bg-black"
               />
             </div>
             <p className="text-white text-center mb-6">
@@ -389,5 +367,4 @@ function AppWrapper() {
   )
 }
 
-export default AppWrapper;
-
+export default AppWrapper
