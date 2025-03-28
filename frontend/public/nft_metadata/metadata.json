@@ -1,6 +1,11 @@
 {
   "name": "Fluent Memory",
   "description": "A memory match game achievement",
-  "image": "/assets/NFT-xyz.jpg",
-  "attributes": [{ "trait_type": "Time", "value": "15" }]
+  "image": "ipfs://bafybeidwvph3orylkxu5a5ygkf2do3mtgzlxco7mtr5bt3gheuova7wb6u",
+  "attributes": [
+    {
+      "trait_type": "Time",
+      "value": "60"
+    }
+  ]
 }
