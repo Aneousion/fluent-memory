@@ -101,12 +101,12 @@ function App() {
     }
     const contract = new ethers.Contract(contractAddress, contractABI, signer)
     try {
-      const metadata = {
-        name: "Fluent Memory",
-        description: "A memory match game achievement",
-        image: "ipfs://bafkreiam4hsd4gcca26pxcg226j52vo5l6clr2ovte2uppnvurpdmflg6m",
-        attributes: [{ trait_type: "Time", value: "15" }],
-      }
+      // const metadata = {
+      //   name: "Fluent Memory",
+      //   description: "A memory match game achievement",
+      //   image: "ipfs://bafkreiam4hsd4gcca26pxcg226j52vo5l6clr2ovte2uppnvurpdmflg6m",
+      //   attributes: [{ trait_type: "Time", value: "15" }],
+      // }
       // Since Pinata SDK is removed, assume metadata is pre-uploaded or use a static URI
       // For simplicity, we'll encode metadata as JSON and use a gateway URL
       // const metadataJson = JSON.stringify(metadata)
@@ -271,7 +271,5 @@ function AppWrapper() {
   )
 }
 
-export default AppWrapper
-
-export default AppWrapper
+export default AppWrapper;
 
