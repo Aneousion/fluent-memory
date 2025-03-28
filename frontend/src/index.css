@@ -28,5 +28,19 @@ body {
   .perspective {
     perspective: 1000px;
   }
+
+  .animate-bounce-once {
+    animation: bounce 0.5s;
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
 

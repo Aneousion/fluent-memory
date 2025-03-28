@@ -29,8 +29,6 @@ const fluentDevnetChain = {
   testnet: true,
 }
 
-
-
 // Wagmi Config with RainbowKit
 const config = createConfig({
   chains: [fluentDevnetChain],
@@ -49,11 +47,83 @@ const contractABI = [
   "function uri(uint256 id) public view returns (string memory)",
 ]
 
+// Simple Confetti Component
+const Confetti = () => {
+  const [particles, setParticles] = useState<
+    Array<{ id: number; x: number; y: number; size: number; color: string; speed: number }>
+  >([])
+
+  useEffect(() => {
+    // Create confetti particles
+    const colors = ["#ff77e9", "#a855f7", "#ec4899", "#ffffff"]
+    const newParticles = Array.from({ length: 100 }).map((_, i) => ({
+      id: i,
+      x: Math.random() * window.innerWidth,
+      y: -20 - Math.random() * 100,
+      size: 5 + Math.random() * 10,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      speed: 2 + Math.random() * 5,
+    }))
+
+    setParticles(newParticles)
+
+    // Animate particles
+    let animationId: number
+    let frame = 0
+
+    const animate = () => {
+      frame++
+      if (frame % 2 === 0) {
+        setParticles((prev) =>
+          prev
+            .map((p) => ({
+              ...p,
+              y: p.y + p.speed,
+              x: p.x + (Math.random() - 0.5) * 2,
+            }))
+            .filter((p) => p.y < window.innerHeight),
+        )
+      }
+
+      if (particles.length > 0) {
+        animationId = requestAnimationFrame(animate)
+      }
+    }
+
+    animationId = requestAnimationFrame(animate)
+
+    return () => {
+      cancelAnimationFrame(animationId)
+    }
+  }, [])
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-50">
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="absolute rounded-full"
+          style={{
+            left: `${p.x}px`,
+            top: `${p.y}px`,
+            width: `${p.size}px`,
+            height: `${p.size}px`,
+            backgroundColor: p.color,
+            transform: `rotate(${Math.random() * 360}deg)`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
 function App() {
   const { address, isConnected, connector } = useAccount()
-  const [signer, setSigner] = useState<ethers.Signer | any>(null)
+  const [signer, setSigner] = useState<ethers.Signer | null | any>(null)
   const [showModal, setShowModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [nextTokenId, setNextTokenId] = useState<number | null>(null)
+  const [showConfetti, setShowConfetti] = useState(false)
 
   useEffect(() => {
     const setupSigner = async () => {
@@ -117,9 +187,18 @@ function App() {
       const uri = `ipfs://bafkreiam4hsd4gcca26pxcg226j52vo5l6clr2ovte2uppnvurpdmflg6m` // Use your CID directly
       const tx = await contract.mintNFT(address, uri)
       await tx.wait()
-      alert("NFT Minted!")
+
+      // Show success popup and confetti instead of alert
       setShowModal(false)
-      window.location.reload() // Refresh the page after minting
+      setShowSuccessModal(true)
+      setShowConfetti(true)
+
+      // Auto-hide success popup after 5 seconds
+      setTimeout(() => {
+        setShowSuccessModal(false)
+        setShowConfetti(false)
+        window.location.reload() // Refresh the page after popup is hidden
+      }, 5000)
     } catch (error) {
       console.error("Failed to mint NFT:", error)
     }
@@ -149,6 +228,9 @@ function App() {
         </video>
       </div>
 
+      {/* Confetti overlay */}
+      {showConfetti && <Confetti />}
+
       {/* Main content container */}
       <div className="relative z-10 min-h-screen flex flex-col items-center">
         {/* Connect button - fixed position */}
@@ -159,6 +241,9 @@ function App() {
         {/* Header */}
         <div className="w-full flex justify-center items-center mt-8 mb-6">
           <div className="flex items-center">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-red-500 flex items-center justify-center text-white font-bold text-xl mr-3">
+              F
+            </div>
             <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-red-500">
               Fluent Memory
             </h1>
@@ -184,12 +269,12 @@ function App() {
           <div className="bg-black/70 backdrop-blur-md rounded-lg p-6 mb-8">
             <h2 className="text-2xl font-bold mb-3 text-white">Instructions</h2>
             <p className="mb-3 text-white/90">
-              Flip cards to find matching pairs. Complete the game within 15 seconds to mint an NFT.
+              Flip cards to find matching pairs. Complete the game within 60 seconds to mint an NFT.
             </p>
             <ol className="list-decimal list-inside text-white/90 space-y-1 pl-2">
               <li>Connect your wallet using the button above.</li>
               <li>Start the game and find all pairs.</li>
-              <li>If you finish within 15 seconds, click "Mint NFT" to claim your reward.</li>
+              <li>If you finish within 60 seconds, click "Mint NFT" to claim your reward.</li>
             </ol>
           </div>
 
@@ -200,7 +285,7 @@ function App() {
         </div>
       </div>
 
-      {/* Modal - fixed position with overlay */}
+      {/* Mint Modal */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/80 backdrop-blur-sm">
           <div className="bg-black/90 backdrop-blur-md border border-gray-500/30 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl relative">
@@ -248,6 +333,39 @@ function App() {
               <button
                 onClick={mintNFT}
                 className="flex-1 bg-white text-black py-3 px-4 rounded-lg font-medium transition-transform hover:scale-105"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/80 backdrop-blur-sm">
+          <div className="bg-black/90 backdrop-blur-md border border-gray-500/30 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl relative animate-bounce-once">
+            <h3 className="text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-red-500 text-center">
+              NFT Minted Successfully!
+            </h3>
+            <div className="p-[2px] bg-gradient-to-r from-pink-500 via-purple-500 to-red-500 rounded-lg mb-6">
+              <img
+                src={NFTImage || "/placeholder.svg"}
+                alt="NFT"
+                className="w-48 h-48 mx-auto object-contain rounded-lg bg-black"
+              />
+            </div>
+            <p className="text-white text-center mb-6">
+              Congratulations! Your Fluent Memory NFT has been minted and added to your wallet.
+            </p>
+            <div className="flex justify-center">
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false)
+                  setShowConfetti(false)
+                  window.location.reload()
+                }}
+                className="bg-white text-black py-3 px-8 rounded-lg font-medium transition-transform hover:scale-105"
               >
                 Continue
               </button>
