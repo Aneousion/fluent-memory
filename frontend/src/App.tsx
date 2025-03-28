@@ -29,6 +29,8 @@ const fluentDevnetChain = {
   testnet: true,
 }
 
+
+
 // Wagmi Config with RainbowKit
 const config = createConfig({
   chains: [fluentDevnetChain],
@@ -49,7 +51,7 @@ const contractABI = [
 
 function App() {
   const { address, isConnected, connector } = useAccount()
-  const [signer, setSigner] = useState<ethers.Signer | null>(null)
+  const [signer, setSigner] = useState<ethers.Signer | any>(null)
   const [showModal, setShowModal] = useState(false)
   const [nextTokenId, setNextTokenId] = useState<number | null>(null)
 
@@ -107,9 +109,9 @@ function App() {
       }
       // Since Pinata SDK is removed, assume metadata is pre-uploaded or use a static URI
       // For simplicity, we'll encode metadata as JSON and use a gateway URL
-      const metadataJson = JSON.stringify(metadata)
-      const metadataBlob = new Blob([metadataJson], { type: "application/json" })
-      const metadataUrl = URL.createObjectURL(metadataBlob) // Temporary local URL for testing
+      // const metadataJson = JSON.stringify(metadata)
+      // const metadataBlob = new Blob([metadataJson], { type: "application/json" })
+      // const metadataUrl = URL.createObjectURL(metadataBlob) // Temporary local URL for testing
       // Ideally, this should be uploaded to IPFS separately and pinned
       // For now, we'll use a pre-uploaded CID or gateway; replace with actual IPFS URI if uploaded
       const uri = `ipfs://bafkreiam4hsd4gcca26pxcg226j52vo5l6clr2ovte2uppnvurpdmflg6m` // Use your CID directly
@@ -261,13 +263,15 @@ function AppWrapper() {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider chains={[fluentDevnetChain]} theme={darkTheme()}>
+        <RainbowKitProvider theme={darkTheme()}>
           <App />
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   )
 }
+
+export default AppWrapper
 
 export default AppWrapper
 
